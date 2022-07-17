@@ -1,0 +1,7 @@
+<% use crate::tagline; %>
+<header id="header-bg">
+    <div id="header-inner">
+        <h1 id="site-title"><a href="/"><% include!("./page_title.stpl"); %></a></h1>
+        <p id="site-tagline"><%= tagline() %></p>
+    </div>
+</header>

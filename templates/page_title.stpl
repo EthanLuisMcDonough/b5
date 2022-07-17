@@ -1,0 +1,2 @@
+<% use crate::page_title; %>
+<%= page_title() %>

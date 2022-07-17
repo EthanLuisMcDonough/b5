@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title><%= post.title %> | <% include!("./page_title.stpl"); %></title>
+        <% include!("./headers.stpl"); %>
+        <meta name="author" content="<%= post.username %>">
+    </head>
+    <body>
+        <% include!("./page_head.stpl"); %>
+        <div id="wrapper">
+            <main class="post-single post-wrapper">
+                <article class="post post-preview">
+                    <h2 class="post-title"><%= post.title %></h2>
+                    <p class="post-author">Posted by <%= post.username %> on <time datetime="<%= post.post_date.format("%Y-%m-%d %H:%M:%S").to_string() %>"><%= post.post_date.format("%m/%d/%Y").to_string() %></time></p>
+                    <div class="post-body"><%- post.body %></div>
+                </article>
+            </main>
+        </div>
+    </body>
+</html>
