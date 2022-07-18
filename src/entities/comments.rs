@@ -21,8 +21,8 @@ pub enum Relation {
         belongs_to = "super::users::Entity",
         from = "Column::AuthorId",
         to = "super::users::Column::UserId",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "SetNull"
     )]
     Users,
     #[sea_orm(

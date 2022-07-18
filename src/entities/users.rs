@@ -10,7 +10,7 @@ pub struct Model {
     #[sea_orm(unique)]
     pub username: String,
     pub password: String,
-    pub join_date: Date,
+    pub join_date: DateTime,
     pub level: u8,
 }
 
