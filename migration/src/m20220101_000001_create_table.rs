@@ -6,9 +6,6 @@ pub struct Migration;
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        // Replace the sample below with your own migration scripts
-        todo!();
-
         manager
             .create_table(
                 Table::create()
@@ -133,6 +130,7 @@ impl MigrationTrait for Migration {
 
 #[derive(Iden)]
 enum Users {
+    Table,
     UserId,
     Username,
     Password,
@@ -151,6 +149,7 @@ UNIQUE INDEX `username_UNIQUE` (`username` ASC) VISIBLE)*/
 
 #[derive(Iden)]
 enum BlogPosts {
+    Table,
     PostId,
     Title,
     Body,
@@ -160,6 +159,7 @@ enum BlogPosts {
 
 #[derive(Iden)]
 enum Comments {
+    Table,
     CommentId,
     PostId,
     AuthorId,
