@@ -17,14 +17,14 @@ pub struct AppState {
 pub fn tagline() -> &'static str {
     use rand::seq::IteratorRandom;
     let mut rng = rand::thread_rng();
-    include_str!("../extra/taglines.txt")
+    include_str!("../config/taglines.txt")
         .split('\n')
         .choose(&mut rng)
         .unwrap_or("No taglines found")
 }
 
 pub fn page_title() -> &'static str {
-    include_str!("../extra/site_title.txt")
+    include_str!("../config/site_title.txt")
 }
 
 #[actix_web::main]
