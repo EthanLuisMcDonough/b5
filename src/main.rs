@@ -19,6 +19,7 @@ pub fn tagline() -> &'static str {
     let mut rng = rand::thread_rng();
     include_str!("../config/taglines.txt")
         .split('\n')
+        .filter(|e| e.len() > 0)
         .choose(&mut rng)
         .unwrap_or("No taglines found")
 }
