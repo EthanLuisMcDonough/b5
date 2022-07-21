@@ -229,6 +229,7 @@ pub async fn posts_page(
 
 async fn any_posts_where(db: &DatabaseConnection, filter: impl IntoCondition) -> ActixResult<bool> {
     BlogPosts::find()
+        .select_only()
         .column_as(blog_posts::Column::PostId.count(), "count")
         .filter(filter)
         .into_model::<CountData>()

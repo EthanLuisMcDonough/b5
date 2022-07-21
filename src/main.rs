@@ -49,3 +49,11 @@ async fn main() -> std::io::Result<()> {
     .run()
     .await
 }
+
+/*
+Levels:
+0 - commenter
+1 - author
+2 - mod
+3 - admin
+*/
