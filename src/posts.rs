@@ -191,7 +191,7 @@ async fn rss(data: web::Data<AppState>) -> ActixResult<HttpResponse> {
         .collect();
 
     Ok(HttpResponse::Ok()
-        .content_type("text/xml")
+        .content_type("application/rss+xml")
         .body(RssTemplate { posts }.render_once().unwrap()))
 }
 
