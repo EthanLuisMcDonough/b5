@@ -7,15 +7,14 @@ use actix_web::{
     get, web, App, HttpRequest, HttpResponse, Result as ActixResult,
 };
 use entities::{blog_posts, users};
-use pulldown_cmark::{
-    html::push_html, CowStr, Event as MarkEvent, InlineStr, Options as MarkOption, Parser,
-};
 use sailfish::TemplateOnce;
 use sea_orm::{entity::*, prelude::*, query::*, sea_query::IntoCondition, FromQueryResult};
 use serde::Deserialize;
 
+use crate::format::*;
+
 const PAGE_SIZE: u64 = 5;
-const PREVIEW_SIZE: usize = 400;
+const RSS_SIZE: u64 = 25;
 
 #[derive(Debug, Deserialize, Default)]
 pub struct CursorQuery {
@@ -30,6 +29,7 @@ struct PostData {
     pub body: String,
     pub username: String,
     pub post_date: DateTime,
+    pub description: Option<String>,
 }
 
 #[derive(FromQueryResult, Debug)]
@@ -48,71 +48,6 @@ struct PostsTemplate {
     entries: Vec<PostPreview>,
     next: Option<u32>,
     prev: Option<u32>,
-}
-
-fn take_words(left: &mut usize, cow: &str) -> usize {
-    if *left == 0 {
-        return 0;
-    }
-
-    let mut in_word = false;
-    let mut decr = || {
-        *left -= 1;
-        *left == 0
-    };
-
-    for (ind, c) in cow.char_indices() {
-        if c.is_whitespace() {
-            if in_word {
-                if decr() {
-                    return ind;
-                }
-                in_word = false;
-            }
-        } else {
-            in_word = true;
-        }
-    }
-
-    if in_word {
-        decr();
-    }
-
-    cow.len()
-}
-
-/// Truncates markdown text/html/code token
-/// See https://docs.rs/pulldown-cmark/latest/pulldown_cmark/enum.CowStr.html
-fn trunc_cow(cow: CowStr<'_>, len: usize, ellipses: bool) -> CowStr<'_> {
-    if cow.len() == len {
-        return cow;
-    } else if len == 0 {
-        return CowStr::Borrowed(if ellipses { "..." } else { "" });
-    }
-
-    match cow {
-        CowStr::Borrowed(b) if !ellipses => CowStr::Borrowed(&b[0..len]),
-        CowStr::Inlined(inl) if !ellipses => CowStr::Inlined(
-            InlineStr::try_from(&inl[0..len]).expect("slice should not exceed inline boundries"),
-        ),
-        _ => {
-            let slice = &cow[0..len];
-            InlineStr::try_from(slice)
-                .map(CowStr::Inlined)
-                .ok()
-                .unwrap_or_else(|| {
-                    let mut s = String::from(slice);
-                    if ellipses {
-                        s.push_str("...");
-                    }
-                    CowStr::Boxed(s.into_boxed_str())
-                })
-        }
-    }
-}
-
-fn post_options() -> MarkOption {
-    MarkOption::ENABLE_STRIKETHROUGH
 }
 
 pub async fn posts_page(
@@ -150,51 +85,13 @@ pub async fn posts_page(
     let entries = entries
         .into_iter()
         .map(|mut entry| {
-            let mut words = PREVIEW_SIZE;
-            let mut level = 0;
-            let mut shortened = false;
-
-            let truncated = Parser::new_ext(&entry.body, post_options()).map_while(|event| {
-                if level == 0 && words == 0 {
-                    shortened = true;
-                    None
-                } else {
-                    let ellipses = words > 0;
-                    Some(match event {
-                        MarkEvent::Code(text) => {
-                            let len = take_words(&mut words, &text);
-                            MarkEvent::Code(trunc_cow(text.clone(), len, ellipses))
-                        }
-                        MarkEvent::Text(text) | MarkEvent::Html(text) => {
-                            let len = take_words(&mut words, &text);
-                            MarkEvent::Text(trunc_cow(text.clone(), len, ellipses))
-                        }
-                        // Do not show any content after a line break
-                        MarkEvent::Rule => {
-                            shortened = true;
-                            return None;
-                        }
-                        MarkEvent::Start(_) => {
-                            level += 1;
-                            event
-                        }
-                        MarkEvent::End(_) => {
-                            level -= 1;
-                            event
-                        }
-                        _ => event,
-                    })
-                }
-            });
-
             let mut body = String::new();
-            push_html(&mut body, truncated);
-
+            let read_more = render_preview(&entry.body, &mut body);
             entry.body = body;
 
             PostPreview {
                 data: entry,
-                read_more: shortened,
+                read_more,
             }
         })
         .collect::<Vec<_>>();
@@ -257,15 +154,7 @@ pub async fn post_page(data: web::Data<AppState>, id: web::Path<u32>) -> ActixRe
         .map_err(ErrorInternalServerError)?;
 
     Ok(if let Some(mut post) = post_op {
-        let events = Parser::new_ext(&post.body, post_options()).map(|event| match event {
-            MarkEvent::Html(s) => MarkEvent::Text(s),
-            _ => event,
-        });
-
-        let mut body = String::new();
-        push_html(&mut body, events);
-
-        post.body = body;
+        post.body = render_full(&post.body);
 
         HttpResponse::Ok()
             .content_type("text/html")
@@ -275,6 +164,35 @@ pub async fn post_page(data: web::Data<AppState>, id: web::Path<u32>) -> ActixRe
             .content_type("text/html")
             .body("not found")
     })
+}
+
+#[derive(TemplateOnce)]
+#[template(path = "rss.stpl")]
+struct RssTemplate {
+    posts: Vec<PostData>,
+}
+
+#[get("/feed.rss")]
+async fn rss(data: web::Data<AppState>) -> ActixResult<HttpResponse> {
+    let posts = BlogPosts::find()
+        .order_by_desc(blog_posts::Column::PostId)
+        .limit(RSS_SIZE)
+        .column(users::Column::Username)
+        .join(JoinType::InnerJoin, blog_posts::Relation::Users.def())
+        .into_model::<PostData>()
+        .all(&data.db)
+        .await
+        .map_err(ErrorInternalServerError)?
+        .into_iter()
+        .map(|mut post| {
+            post.body = render_full(&post.body);
+            post
+        })
+        .collect();
+
+    Ok(HttpResponse::Ok()
+        .content_type("application/rss+xml")
+        .body(RssTemplate { posts }.render_once().unwrap()))
 }
 
 #[get("/")]

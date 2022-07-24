@@ -1,4 +1,6 @@
+mod config;
 mod entities;
+mod format;
 mod posts;
 
 use self::posts::*;
@@ -14,20 +16,6 @@ pub struct AppState {
     db: DatabaseConnection,
 }
 
-pub fn tagline() -> &'static str {
-    use rand::seq::IteratorRandom;
-    let mut rng = rand::thread_rng();
-    include_str!("../config/taglines.txt")
-        .split('\n')
-        .filter(|e| e.len() > 0)
-        .choose(&mut rng)
-        .unwrap_or("No taglines found")
-}
-
-pub fn page_title() -> &'static str {
-    include_str!("../config/site_title.txt")
-}
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv::dotenv().unwrap();
@@ -41,6 +29,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(web::Data::new(AppState { db: db.clone() }))
             .service(home)
+            .service(rss)
             .route("/posts", web::get().to(posts_page))
             .service(post_page)
             .service(Files::new("/static", "./static"))

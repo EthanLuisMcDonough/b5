@@ -1,5 +1,4 @@
 /target
 .env
-config/taglines.txt
-config/site_title.txt
+config
 migration/target

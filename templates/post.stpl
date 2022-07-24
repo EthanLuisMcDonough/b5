@@ -1,9 +1,13 @@
+<% use crate::config::PAGE_TITLE; %>
 <!DOCTYPE html>
 <html>
     <head>
-        <title><%= post.title %> | <% include!("./page_title.stpl"); %></title>
+        <title><%= post.title %> | <%= PAGE_TITLE %></title>
         <% include!("./headers.stpl"); %>
         <meta name="author" content="<%= post.username %>">
+        <% if let Some(description) = post.description { %>
+            <meta name="description" content="<%= description %>">
+        <% } %>
     </head>
     <body>
         <% include!("./page_head.stpl"); %>

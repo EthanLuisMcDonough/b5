@@ -1,0 +1,29 @@
+<% use crate::config::{PAGE_TITLE, SITE_URL, WEBMASTER_EMAIL}; %><?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title><%= PAGE_TITLE %></title>
+        <link><%= SITE_URL %></link>
+        <description />
+        <atom:link href="<%= SITE_URL %>feed.rss" rel="self"/>
+        <language>en-us</language>
+        <webMaster><%= WEBMASTER_EMAIL %> (Site webmaster)</webMaster>
+        <generator>b5 blogging software</generator>
+        <% for post in &posts { %>
+            <item>
+                <title><%= post.title %></title>
+                <link><%= SITE_URL %>post/<%= post.post_id %></link>
+                <guid><%= SITE_URL %>post/<%= post.post_id %></guid>
+                <pubDate><%= post.post_date.format("%a, %d %b %Y %H:%M:%S +0000").to_string() %></pubDate>
+                <% if let Some(description) = &post.description {  %>
+                    <description><%= description %></description>
+                <% } else { %>
+                    <description />
+                <% } %>
+                <dc:creator><%= post.username %></dc:creator>
+                <content:encoded>
+                    <%= post.body %>
+                </content:encoded>
+            </item>
+        <% } %>
+    </channel>
+</rss>

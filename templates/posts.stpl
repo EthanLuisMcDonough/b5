@@ -1,7 +1,8 @@
+<% use crate::config::PAGE_TITLE; %>
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Posts | <% include!("./page_title.stpl"); %></title>
+        <title>Posts | <%= PAGE_TITLE %></title>
         <% include!("./headers.stpl"); %>
     </head>
     <body>

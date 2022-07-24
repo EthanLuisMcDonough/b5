@@ -31,22 +31,6 @@ impl MigrationTrait for Migration {
             )
             .await?;
 
-        /*CREATE TABLE IF NOT EXISTS `blog`.`blog_posts` (
-          `post_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-          `title` VARCHAR(100) NOT NULL,
-          `body` TEXT NOT NULL,
-          `author_id` INT UNSIGNED NOT NULL,
-          `post_date` DATETIME NOT NULL,
-          PRIMARY KEY (`post_id`),
-          INDEX `author_id_idx` (`author_id` ASC) VISIBLE,
-          CONSTRAINT `author_id`
-            FOREIGN KEY (`author_id`)
-            REFERENCES `blog`.`users` (`user_id`)
-            ON UPDATE CASCADE)
-        ENGINE = InnoDB
-        AUTO_INCREMENT = 10
-        DEFAULT CHARACTER SET = utf8mb4
-        COLLATE = utf8mb4_0900_ai_ci;*/
         manager
             .create_table(
                 Table::create()
@@ -138,15 +122,6 @@ enum Users {
     Level,
 }
 
-/*CREATE TABLE IF NOT EXISTS `blog`.`users` (
-`user_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-`username` VARCHAR(60) NOT NULL,
-`password` CHAR(60) NOT NULL,
-`join_date` DATE NOT NULL,
-`level` TINYINT UNSIGNED NOT NULL DEFAULT '0',
-PRIMARY KEY (`user_id`),
-UNIQUE INDEX `username_UNIQUE` (`username` ASC) VISIBLE)*/
-
 #[derive(Iden)]
 enum BlogPosts {
     Table,
@@ -167,26 +142,3 @@ enum Comments {
     Body,
     CommentDate,
 }
-/*CREATE TABLE IF NOT EXISTS `blog`.`comments` (
-  `comment_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `post_id` INT UNSIGNED NOT NULL,
-  `author_id` INT UNSIGNED NULL DEFAULT NULL,
-  `anon_name` VARCHAR(60) NULL DEFAULT NULL,
-  `body` TEXT NOT NULL,
-  `comment_date` DATETIME NOT NULL,
-  PRIMARY KEY (`comment_id`),
-  INDEX `post_id_idx` (`post_id` ASC) VISIBLE,
-  INDEX `comment_author_idx` (`author_id` ASC) VISIBLE,
-  CONSTRAINT `fk_comment_author`
-    FOREIGN KEY (`author_id`)
-    REFERENCES `blog`.`users` (`user_id`),
-  CONSTRAINT `fk_comment_post`
-    FOREIGN KEY (`post_id`)
-    REFERENCES `blog`.`blog_posts` (`post_id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
-
-*/
