@@ -5,9 +5,8 @@ mod posts;
 
 use self::posts::*;
 use actix_files::Files;
-use actix_web::{
-    web, App, HttpRequest, HttpResponse, HttpServer, Responder, Result as ActixResult,
-};
+use actix_web::{web, App, HttpServer};
+use config::CONFIG;
 use sea_orm::{Database, DatabaseConnection};
 use std::env;
 
@@ -18,12 +17,14 @@ pub struct AppState {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    println!("Starting {}", CONFIG.title);
     dotenv::dotenv().unwrap();
     let connection_str = env::var("DATABASE_URL").expect("no connection string fond in env");
 
     let db = Database::connect(&connection_str)
         .await
         .expect("Could not create db");
+    println!("Connected to DB. Running server...");
 
     HttpServer::new(move || {
         App::new()

@@ -1,15 +1,36 @@
-pub fn tagline() -> &'static str {
-    use rand::seq::IteratorRandom;
-    let mut rng = rand::thread_rng();
-    include_str!("../config/taglines.txt")
-        .split('\n')
-        .filter(|e| e.len() > 0)
-        .choose(&mut rng)
-        .unwrap_or("No taglines found")
+use lazy_static::lazy_static;
+use serde_derive::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Webmaster {
+    pub email: String,
+    pub name: String,
 }
 
-// Sailfish doesn't play nice with include_str inside templates
-// so these manual exports are needed
-pub const PAGE_TITLE: &'static str = include_str!("../config/site_title.txt");
-pub const SITE_URL: &'static str = include_str!("../config/site_url.txt");
-pub const WEBMASTER_EMAIL: &'static str = include_str!("../config/webmaster_email.txt");
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Config {
+    pub title: String,
+    pub url: String,
+    pub description: String,
+    pub webmaster: Webmaster,
+    pub taglines: Vec<String>,
+    pub preview_size: usize,
+    pub page_size: u64,
+    pub rss_size: u64,
+}
+
+impl Config {
+    pub fn tagline(&self) -> Option<&String> {
+        use rand::seq::SliceRandom;
+        let mut rng = rand::thread_rng();
+        self.taglines.choose(&mut rng)
+    }
+}
+
+lazy_static! {
+    pub static ref CONFIG: Config = {
+        let raw_config =
+            std::fs::read_to_string("./config.json").expect("Could not read config.json");
+        serde_json::from_str::<Config>(&raw_config).expect("Could not parse config.json")
+    };
+}

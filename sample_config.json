@@ -1,0 +1,15 @@
+{
+    "title": "My blog",
+    "url": "https://www.example.com/",
+    "description": "Description",
+    "webmaster": {
+        "email": "example@example.com",
+        "name": "Jane Doe"
+    },
+    "taglines": [
+        "Blog description"
+    ],
+    "preview_size": 400,
+    "page_size": 5,
+    "rss_size": 25
+}

@@ -528,6 +528,7 @@ dependencies = [
  "bcrypt",
  "dotenv",
  "html-escape",
+ "lazy_static",
  "pulldown-cmark",
  "rand",
  "sailfish",

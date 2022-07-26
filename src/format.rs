@@ -1,10 +1,7 @@
+use super::config::CONFIG;
 use pulldown_cmark::{
     html::push_html, CowStr, Event as MarkEvent, InlineStr, Options as MarkOption, Parser,
 };
-
-const PAGE_SIZE: u64 = 5;
-const PREVIEW_SIZE: usize = 400;
-const RSS_SIZE: u64 = 25;
 
 /// Takes a number of words as long as there are words "left"
 fn take_words(left: &mut usize, cow: &str) -> usize {
@@ -73,7 +70,7 @@ fn post_options() -> MarkOption {
 }
 
 pub fn render_preview(full_body: &str, buffer: &mut String) -> bool {
-    let mut words = PREVIEW_SIZE;
+    let mut words = CONFIG.preview_size;
     let mut level = 0;
     let mut shortened = false;
 

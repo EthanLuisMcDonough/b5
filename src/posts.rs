@@ -1,4 +1,6 @@
+use crate::format::*;
 use crate::{
+    config::CONFIG,
     entities::{self, prelude::*},
     AppState,
 };
@@ -10,11 +12,6 @@ use entities::{blog_posts, users};
 use sailfish::TemplateOnce;
 use sea_orm::{entity::*, prelude::*, query::*, sea_query::IntoCondition, FromQueryResult};
 use serde::Deserialize;
-
-use crate::format::*;
-
-const PAGE_SIZE: u64 = 5;
-const RSS_SIZE: u64 = 25;
 
 #[derive(Debug, Deserialize, Default)]
 pub struct CursorQuery {
@@ -58,7 +55,7 @@ pub async fn posts_page(
     let mut query = BlogPosts::find()
         .column(users::Column::Username)
         .join(JoinType::InnerJoin, blog_posts::Relation::Users.def())
-        .limit(PAGE_SIZE);
+        .limit(CONFIG.page_size);
 
     let mut reverse = false;
     let mut entries = if let Some(id) = query_str.after {
@@ -176,7 +173,7 @@ struct RssTemplate {
 async fn rss(data: web::Data<AppState>) -> ActixResult<HttpResponse> {
     let posts = BlogPosts::find()
         .order_by_desc(blog_posts::Column::PostId)
-        .limit(RSS_SIZE)
+        .limit(CONFIG.rss_size)
         .column(users::Column::Username)
         .join(JoinType::InnerJoin, blog_posts::Relation::Users.def())
         .into_model::<PostData>()

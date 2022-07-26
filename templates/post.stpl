@@ -1,8 +1,8 @@
-<% use crate::config::PAGE_TITLE; %>
+<% use crate::config::CONFIG; %>
 <!DOCTYPE html>
 <html>
     <head>
-        <title><%= post.title %> | <%= PAGE_TITLE %></title>
+        <title><%= post.title %> | <%= CONFIG.title %></title>
         <% include!("./headers.stpl"); %>
         <meta name="author" content="<%= post.username %>">
         <% if let Some(description) = post.description { %>

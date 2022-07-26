@@ -1,7 +1,9 @@
-<% use crate::config::{tagline, PAGE_TITLE}; %>
+<% use crate::config::CONFIG; %>
 <header id="header-bg">
     <div id="header-inner">
-        <h1 id="site-title"><a href="/"><%= PAGE_TITLE %></a></h1>
-        <p id="site-tagline"><%= tagline() %></p>
+        <h1 id="site-title"><a href="/"><%= CONFIG.title %></a></h1>
+        <% if let Some(tagline) = CONFIG.tagline() { %>
+            <p id="site-tagline"><%= tagline %></p>
+        <% } %>
     </div>
 </header>
