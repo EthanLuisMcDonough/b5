@@ -4,10 +4,7 @@ use crate::{
     entities::{self, prelude::*},
     AppState,
 };
-use actix_web::{
-    error::{self, ErrorInternalServerError},
-    get, web, App, HttpRequest, HttpResponse, Result as ActixResult,
-};
+use actix_web::{error::ErrorInternalServerError, get, web, HttpResponse, Result as ActixResult};
 use entities::{blog_posts, users};
 use sailfish::TemplateOnce;
 use sea_orm::{entity::*, prelude::*, query::*, sea_query::IntoCondition, FromQueryResult};

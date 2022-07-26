@@ -1,6 +1,6 @@
 <% use crate::config::CONFIG; %>
 <!DOCTYPE html>
-<html>
+<html lang="<%= CONFIG.lang %>">
     <head>
         <title>Posts | <%= CONFIG.title %></title>
         <% include!("./headers.stpl"); %>

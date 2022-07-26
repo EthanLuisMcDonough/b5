@@ -5,7 +5,7 @@
         <link><%= CONFIG.url %></link>
         <description><%= CONFIG.description %></description>
         <atom:link href="<%= CONFIG.url %>feed.rss" rel="self"/>
-        <language>en-us</language>
+        <language><%= CONFIG.lang %></language>
         <webMaster><%= CONFIG.webmaster.email %> (<%= CONFIG.webmaster.name %>)</webMaster>
         <generator>b5 blogging software</generator>
         <% for post in &posts { %>

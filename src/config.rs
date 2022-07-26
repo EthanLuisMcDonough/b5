@@ -17,6 +17,7 @@ pub struct Config {
     pub preview_size: usize,
     pub page_size: u64,
     pub rss_size: u64,
+    pub lang: String,
 }
 
 impl Config {
